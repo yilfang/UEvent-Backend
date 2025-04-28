@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<script type="text/javascript" src="../../lib/jquery.js"></script>
+<script type="text/javascript" src="../../lib/logger.js"></script>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EventHub</title>
+  <link rel="stylesheet" type="text/css" href="css/style.css">
+</head>
+<body>
+  <header>
+    <div class="main">
+        <div class="container">
+            <div class="welcome">
+                <a>You've been invited!</a>
+            </div>
+            <div>
+                <div class="first">
+                    <b id="event" class="parsed"></b>
+                </div>
+                <div class="info">
+                    <img class="image" src="user.png" width="20" height="20" />
+                    <c id='organizer' class="parsed"></c>
+                </div>
+                <div class="info">
+                    <img class="image" src="home.png" width="20" height="20" />
+                    <c id='address' class="parsed"></c>
+                </div>
+                <div class="info">
+                    <img class="image" src="calendar.png" width="20" height="20" />
+                    <c id='date' class="parsed"></c>
+                </div>
+                <div class="last">
+                    <img class="image" src="clock.png" width="20" height="20" />
+                    <c id='time' class="parsed"></c>
+                </div>
+            </div>
+            
+
+        
+            <div class="button">
+                <a href="https://testflight.apple.com/join/zUbKSZRZ"><button class="btn-1">VIEW IN APP</button> </button></a>
+            </div>
+            <script>
+                /*
+                fetch("https://eventhubum.com/EventHub/rest/events/get/85")
+                .then((response) => response.json())
+                .then((json) => {
+                    event = json.name;
+                })
+                .catch((error) => {
+                    event = "Error: event not found"
+                })
+                */
+                
+            
+                // api url
+				const queryString = window.location.search;
+				const urlParams = new URLSearchParams(queryString);
+				const eventId = urlParams.get('eventId');
+				const url = "https://eventhubum.com/EventHub/rest/events/get/" + eventId;
+                fetch(url)
+                .then((response) => response.json())
+                .then((json) => {
+                    const event = {...json};
+                    if (event.startTime.split(" ")[0] == event.endTime.split(" ")[0]) {
+                        document.getElementById("date").innerHTML = event.startTime.split(" ")[0];
+                    } else {
+                        document.getElementById("date").innerHTML = event.startTime.split(" ")[0] + " - " + event.endTime.split(" ")[0];
+                    }
+                    document.getElementById("event").innerHTML = event.name;
+                    document.getElementById("organizer").innerHTML = event.organizer;
+                    document.getElementById("address").innerHTML = event.location.split(",")[0];   
+                    if (event.startTime.split(" ")[1].split(":")[0] > 12) {
+                        document.getElementById("time").innerHTML = (event.startTime.split(" ")[1].split(":")[0] - 12) + ":" + event.startTime.split(" ")[1].split(":")[1] + " PM"
+                    } else {
+                        document.getElementById("time").innerHTML = event.startTime.split(" ")[1].split(":")[0] + ":" + event.startTime.split(" ")[1].split(":")[1] + " AM"
+                    }
+                    if (event.endTime.split(" ")[1].split(":")[0] > 12) {
+                        document.getElementById("time").innerHTML += " - " + (event.endTime.split(" ")[1].split(":")[0] - 12) + ":" + event.endTime.split(" ")[1].split(":")[1] + " PM"
+                    } else {
+                        document.getElementById("time").innerHTML += " - " + event.endTime.split(" ")[1].split(":")[0] +":" + event.endTime.split(" ")[1].split(":")[1] + " AM"
+                    }
+                })
+                    
+            
+                
+              </script>
+
+        </div>
+    </div>
+</header>   
+<script type="text/javascript">
+   document.write("eventId: " + eventId);
+</script>
+</body>
+</html>
+

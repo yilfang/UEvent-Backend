@@ -1,0 +1,9 @@
+{ 
+	"applinks": { 
+	"apps": [], 
+	"details": [{ 
+			"appID": "DGV6XVKJ5J.com.eventhub.eventhubum", 
+			"paths": ["/event?eventId=*"] 
+		}] 
+   	} 
+}

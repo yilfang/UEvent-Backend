@@ -1,0 +1,111 @@
+<?xml version = "1.0" encoding = "UTF-8"?> 
+ <web-app version="4.0" xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee 
+   					http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd">
+   <display-name>Event Hub</display-name> 
+   <servlet> 
+      <servlet-name>Jersey RESTful Application</servlet-name> 
+      <servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class> 
+      <init-param> 
+         <param-name>jersey.config.server.provider.packages</param-name> 
+         <param-value>net.eventhub.rest</param-value>
+      </init-param> 
+      <init-param>
+        <param-name>com.sun.jersey.api.json.POJOMappingFeature</param-name>
+        <param-value>true</param-value>
+	  </init-param>
+	  <init-param>
+            <param-name>javax.ws.rs.container.ContainerRequestFilter</param-name>
+           <param-value>net.eventhub.utils.AuthenticationFilter</param-value>
+       </init-param>
+ 	<load-on-startup>1</load-on-startup>
+   </servlet> 
+   <!-- 
+    <servlet>
+        <servlet-name>Swagger Configuration</servlet-name>
+        <servlet-class>net.eventhub.utils.SwaggerConfigurationServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+     -->
+   <servlet-mapping> 
+      <servlet-name>Jersey RESTful Application</servlet-name> 
+      <url-pattern>/rest/*</url-pattern> 
+   </servlet-mapping>
+<servlet>
+<servlet-name>AppleAppSiteAssociation</servlet-name>
+   <servlet-class>net.eventhub.utils.AppleAppSiteAssociation</servlet-class>
+</servlet>
+
+<servlet-mapping>
+   <servlet-name>AppleAppSiteAssociation</servlet-name>
+   <url-pattern>/.well-known/apple-app-site-association</url-pattern>
+</servlet-mapping>
+
+<servlet>
+<servlet-name>UrlRewrite</servlet-name>
+   <servlet-class>net.eventhub.utils.UrlRewrite</servlet-class>
+</servlet>
+
+<servlet-mapping>
+   <servlet-name>UrlRewrite</servlet-name>
+   <url-pattern>/NoApp/</url-pattern>
+</servlet-mapping>
+
+<security-constraint>
+    <web-resource-collection>
+        <web-resource-name>Jersey RESTful Application</web-resource-name>
+        <url-pattern>/rest/*</url-pattern>
+    </web-resource-collection>
+    <user-data-constraint>
+        <transport-guarantee>CONFIDENTIAL</transport-guarantee>
+    </user-data-constraint>
+    
+</security-constraint>
+   <!-- 
+  <filter>
+    <filter-name>ApiOriginFilter</filter-name>
+    <filter-class>net.eventhub.utils.ApiOriginFilter</filter-class>
+</filter>
+<filter-mapping>
+    <filter-name>ApiOriginFilter</filter-name>
+    <url-pattern>/rest/*</url-pattern>
+</filter-mapping>
+     -->
+   <listener>
+        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+    </listener>
+    
+    <!-- Load Spring context for registering beans within application context -->
+    <context-param>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>WEB-INF/spring-hibernate-jersey2.xml</param-value>
+    </context-param>
+    
+    <filter>
+  		<filter-name>CorsFilter</filter-name>
+  		<filter-class>org.apache.catalina.filters.CorsFilter</filter-class>
+  		<init-param>
+    		<param-name>cors.allowed.origins</param-name>
+    		<param-value>*</param-value>
+  		</init-param>
+	</filter>
+	<filter-mapping>
+  		<filter-name>CorsFilter</filter-name>
+  		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+	
+	<filter>
+		<filter-name>javamelody</filter-name>
+		<filter-class>net.bull.javamelody.MonitoringFilter</filter-class>
+		<init-param>
+			<param-name>authorized-users</param-name>
+			<param-value>qjian:McLean1527</param-value>
+		</init-param>	
+	</filter>
+    
+    <!-- Welcome File -->
+    <welcome-file-list>
+        <welcome-file>index.jsp</welcome-file>
+    </welcome-file-list>   
+</web-app>

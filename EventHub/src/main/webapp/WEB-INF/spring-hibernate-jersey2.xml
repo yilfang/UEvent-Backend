@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+    http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+    http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd">
+    
+    <!-- to activate annotations in beans already registered in the application context -->
+    <context:annotation-config />
+    
+    <!-- scans packages to find and register beans within the application context -->
+    <context:component-scan base-package="net.eventhub" />
+    <!-- properties file -->
+   <!--  <context:property-placeholder location="classpath:eventhub.properties"/> -->
+    
+    <!--                                                                      -->
+ <!-- Configuration for encryptor, based on environment variables.         -->
+ <!--                                                                      -->
+ <!-- In this example, the encryption password will be read from an        -->
+ <!-- environment variable called "APP_ENCRYPTION_PASSWORD" which, once    --> 
+ <!-- the application has been started, could be safely unset.             -->
+ <!--        -->                                                            
+ <bean id="environmentVariablesConfiguration"
+     class="org.jasypt.encryption.pbe.config.EnvironmentStringPBEConfig">
+   <property name="algorithm" value="PBEWithMD5AndDES" />
+   <property name="passwordEnvName" value="APP_ENCRYPTION_PASSWORD" />
+ </bean>
+  
+  
+  <bean id="configBean" class="net.eventhub.utils.EventHubEncryptor" />
+  
+ <!--                                                                      -->
+ <!-- The will be the encryptor used for decrypting configuration values.  -->
+ <!--                                                                      -->
+ <bean id="configurationEncryptor"
+     class="org.jasypt.encryption.pbe.StandardPBEStringEncryptor">
+   <property name="config" ref="environmentVariablesConfiguration" />
+ </bean>
+
+
+ <!--                                                                      -->
+ <!-- The EncryptablePropertyPlaceholderConfigurer will read the           -->
+ <!-- .properties files and make their values accessible as ${var}.        -->
+ <!--                                                                      -->
+ <!-- Our "configurationEncryptor" bean (which implements                  --> 
+ <!-- org.jasypt.encryption.StringEncryptor) is set as a constructor arg.  -->
+ <!--                                                                      -->
+ <bean id="propertyConfigurer"
+     class="org.jasypt.spring4.properties.EncryptablePropertyPlaceholderConfigurer">
+   <constructor-arg ref="configurationEncryptor" />
+   <property name="locations">
+     <list>
+       <value>/WEB-INF/classes/eventhub.properties</value>
+     </list>
+   </property>
+   
+ </bean>
+    
+    <!-- turn on spring transaction annotation -->
+    <tx:annotation-driven transaction-manager="transactionManager" />
+    
+    <!-- Transaction Manager -->
+    <bean id="transactionManager" class="org.springframework.orm.hibernate5.HibernateTransactionManager">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+    
+    <!-- Session Factory -->
+    <bean id="sessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+        <property name="dataSource" ref="wrappedDataSource" />
+        <property name="annotatedClasses">
+            <list>
+                <value>net.eventhub.domain.User</value>
+                <value>net.eventhub.domain.Event</value>
+                <value>net.eventhub.domain.Category</value>
+                <value>net.eventhub.domain.EventCategory</value>
+                <value>net.eventhub.domain.EventUpdate</value>
+                <value>net.eventhub.domain.EventInvitee</value>
+                <value>net.eventhub.domain.EventFollower</value>
+                <value>net.eventhub.domain.EventAttendee</value>
+                <value>net.eventhub.domain.InvitationStatus</value>
+                <value>net.eventhub.domain.UserPushToken</value>
+            </list>
+        </property>
+        <property name="hibernateProperties">
+            <props>
+                <!-- <prop key="hibernate.dialect">org.hibernate.dialect.SQLServer2012Dialect </prop>  -->
+                <prop key="hibernate.dialect">org.hibernate.dialect.MySQL8Dialect</prop>
+                <prop key="hibernate.hbm2ddl.auto">update</prop>
+                <prop key="hibernate.show_sql">true</prop>
+            </props>
+        </property>
+    </bean>
+    
+    <!-- dataSource configuration for sql express-->
+    <!-- 
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="net.sourceforge.jtds.jdbc.Driver" />
+        <property name="url" value="jdbc:jtds:sqlserver://localhost:1433/MyTest;instance=SQLEXPRESS" />
+        <property name="username" value="MyTest" />
+        <property name="password" value="MyTest" />
+    </bean>
+     -->
+     
+     <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+     	<!-- <property name="hibernate.connection.driver_class" value="net.bull.javamelody.JdbcDriver"/> -->
+        <property name="driverClassName" value="com.mysql.cj.jdbc.Driver" />
+        <property name="url" value="jdbc:mysql://localhost:3306/eventhub_new" />
+        <property name="username" value="${db_user}" />
+        <property name="password" value="${db_pass}" />
+    </bean>
+    
+    <bean id="wrappedDataSource" class="net.bull.javamelody.SpringDataSourceFactoryBean">
+    <property name="targetName" value="dataSource" />
+</bean>
+</beans>
